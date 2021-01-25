@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void *func(unsigned char *inputImageArray, int rfactor);
+extern void *func(unsigned char *inputFileArray, int rfactor);
 
 int main(int argc, char *argv[])
 {
@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
     int i = 0;
     long fileSize;
 
-    FILE *outputImage, *inputImage;
-    unsigned char *inputImageArray, *outputImageArray;
+    FILE *outputFile, *inputFile;
+    unsigned char *inputFileArray, *outputFileArray;
 
     if (argc <= 2)
     {
@@ -18,28 +18,28 @@ int main(int argc, char *argv[])
     }
     else
     {
-        inputImage = fopen(argv[1], "r+");
-        if (inputImage == NULL)
+        inputFile = fopen(argv[1], "r+");
+        if (inputFile == NULL)
         {
             printf("Cannot open the file %s \n", argv[1]);
         }
         else
         {
-            outputImage = fopen("out.bmp", "w");
-            fseek(inputImage, 0, SEEK_END);
-            fileSize = ftell(inputImage);
-            fseek(inputImage, 0, SEEK_SET);
+            outputFile = fopen("out.bmp", "w");
+            fseek(inputFile, 0, SEEK_END);
+            fileSize = ftell(inputFile);
+            fseek(inputFile, 0, SEEK_SET);
 
-            inputImageArray = malloc(fileSize);
-            fread(inputImageArray, 1, fileSize, inputImage);
+            inputFileArray = malloc(fileSize);
+            fread(inputFileArray, 1, fileSize, inputFile);
 
             rfactor = atoi(argv[2]);
 
-            /*func(inputImageArray, rfactor);*/
+            /*func(inputFileArray, rfactor);*/
 
-            fwrite(inputImageArray, 1, fileSize, outputImage);
-            fclose(outputImage);
-            fclose(inputImage);
+            fwrite(inputFileArray, 1, fileSize, outputFile);
+            fclose(outputFile);
+            fclose(inputFile);
         }
     }
 
