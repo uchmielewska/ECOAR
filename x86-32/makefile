@@ -9,6 +9,6 @@ cc :
 link :
 	$(CC) -m32 -g -o program main.o func.o
 clean :
-	del *.o
-	del program.exe
-	del func.lst
+	rm *.o
+	rm program.exe
+	rm func.lst
