@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void *func(unsigned char *inputFileArray, int rfactor);
+extern void *reduce_contrast(unsigned char *inputFileArray, int rfactor);
 
 int main(int argc, char *argv[])
 {
@@ -18,14 +18,14 @@ int main(int argc, char *argv[])
     }
     else
     {
-        inputFile = fopen(argv[1], "r+");
+        inputFile = fopen(argv[1], "rb");
         if (inputFile == NULL)
         {
             printf("Cannot open the file %s \n", argv[1]);
         }
         else
         {
-            outputFile = fopen("out.bmp", "w");
+            outputFile = fopen("out.bmp", "wb");
             fseek(inputFile, 0, SEEK_END);
             fileSize = ftell(inputFile);
             fseek(inputFile, 0, SEEK_SET);
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
             rfactor = atoi(argv[2]);
 
-            /*func(inputFileArray, rfactor);*/
+            reduce_contrast(inputFileArray, rfactor);
 
             fwrite(inputFileArray, 1, fileSize, outputFile);
             fclose(outputFile);
@@ -45,3 +45,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
