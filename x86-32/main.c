@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void *reduce_contrast(unsigned char *inputFileArray, int rfactor);
+extern void reduce_contrast(unsigned char *inputFileArray, int rfactor);
 
 int main(int argc, char *argv[])
 {
