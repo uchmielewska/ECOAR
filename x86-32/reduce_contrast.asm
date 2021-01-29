@@ -44,9 +44,13 @@ _reduce_contrast:
         mov     dword [ebp-28], eax             ;store padding in [ebp-28]
 
         mov     eax, dword [ebp-20]
+        mov     ebx, 3
+        mul     ebx
         mov     dword [ebp-12], eax             ;set rowCounter as height
+        mov     dword [ebp-32], 0               ;set columnCounter to 0
         mov     dl, 128                         ;load 128 to dl
         sub     dl, [ebp+12]                    ;128-rfactor
+        mov     cl, [ebp-28]                    ;load num of padding bytes to cl
 
 row:
         mov     al, [edi]                       ;load current pixel to al
@@ -54,9 +58,10 @@ row:
         mul     bl                              ;newPixel *= rfactor                  
         shr     al, 7                           ;newPixel /= 128
         add     al, dl                          ;newPixel += (128 - rfactor)
+        mov     al, 0
         stosb                                   ;increment edi
-        inc     dword [ebp-28]                  ;columnCounter++
-        mov     eax, dword [ebp-28]             ;load columnCounter to eax
+        inc     dword [ebp-32]                  ;columnCounter++
+        mov     eax, dword [ebp-32]             ;load columnCounter to eax
         mov     ebx, dword [ebp-16]             ;load width to ebx
         cmp     eax, ebx                        ;compare columnCounter with width
         jg      padding                         ;if columnCounter > width go to padding
@@ -64,9 +69,10 @@ row:
 
 padding:
         dec     dword [ebp-12]                  ;rowCounter--
-        mov     eax, dword [ebp-28]
-        add     edi, eax                        ;move image pointer by the number of padding bytes
-        mov     dword [ebp-28], 0               ;set columnCounter as 0
+        mov     al, [edi]                       ;load current pixel to al
+        add     al, cl                          ;move image pointer by the number of padding bytes
+        stosb
+        mov     dword [ebp-32], 0               ;set columnCounter as 0
         cmp     dword [ebp-12], 0               ;compare rowCounter with 0
         jg      row                             ;if rowCounter > 0 go to row
         jmp     exit
