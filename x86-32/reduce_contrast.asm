@@ -5,6 +5,7 @@
 ; ebp-24 - offset
 ; ebp-28 - padding
 ; ebp-32 - columnCounter
+; ebp-36 - normWidth
 
 ;algorithm
 ;newPixel = (128 - rfactor) + (pixel/128)*rfactor;
@@ -21,7 +22,7 @@ _reduce_contrast:
         push    ebp 
         mov     ebp, esp     
         
-        sub     esp, 36                         ;declare the stack size
+        sub     esp, 40                         ;declare the stack size
         mov     edi, DWORD[ebp+8]               ;save pointer to the file (first argument)
 
         mov     eax, dword [edi+10]             ;get offset
@@ -44,34 +45,39 @@ _reduce_contrast:
         mov     dword [ebp-28], eax             ;store padding in [ebp-28]
 
         mov     eax, dword [ebp-20]
-        mov     ebx, 3
-        mul     ebx
         mov     dword [ebp-12], eax             ;set rowCounter as height
         mov     dword [ebp-32], 0               ;set columnCounter to 0
         mov     dl, 128                         ;load 128 to dl
         sub     dl, [ebp+12]                    ;128-rfactor
         mov     cl, [ebp-28]                    ;load num of padding bytes to cl
 
+        mov     eax, dword [ebp-16]
+        mov     ebx, 3
+        mul     ebx
+        mov     dword [ebp-36], eax             ;store normWidth in [ebp-36]
+
 row:
         mov     al, [edi]                       ;load current pixel to al
-        mov     bl, [ebp+12]                    ;load rfactor to bl
-        mul     bl                              ;newPixel *= rfactor                  
-        shr     al, 7                           ;newPixel /= 128
-        add     al, dl                          ;newPixel += (128 - rfactor)
-        mov     al, 0
-        stosb                                   ;increment edi
+        
+        mov     ebx, [ebp+12]
+        add     eax, -128
+        imul    bl
+        sar     eax, 7
+        add     eax, 128
+        mov     byte[edi], al
+        inc     edi
+        
         inc     dword [ebp-32]                  ;columnCounter++
         mov     eax, dword [ebp-32]             ;load columnCounter to eax
-        mov     ebx, dword [ebp-16]             ;load width to ebx
-        cmp     eax, ebx                        ;compare columnCounter with width
-        jg      padding                         ;if columnCounter > width go to padding
+        mov     ebx, dword [ebp-36]             ;load normWidth to ebx
+        cmp     eax, ebx                        ;compare columnCounter with normWidth
+        jg      padding                         ;if columnCounter > normWidth go to padding
         jmp     row
 
 padding:
         dec     dword [ebp-12]                  ;rowCounter--
         mov     al, [edi]                       ;load current pixel to al
         add     al, cl                          ;move image pointer by the number of padding bytes
-        stosb
         mov     dword [ebp-32], 0               ;set columnCounter as 0
         cmp     dword [ebp-12], 0               ;compare rowCounter with 0
         jg      row                             ;if rowCounter > 0 go to row
