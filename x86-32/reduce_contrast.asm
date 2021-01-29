@@ -22,16 +22,17 @@ _reduce_contrast:
 
         ;normWidth calculate
         mov     eax, dword [edi+18]             ;load width to eax
-        mov     ebx, 3                          ;load 3 to ebx
-        mul     ebx                             ;width*3
+        mov     ebx, 0x3                        ;load 3 to ebx
+        mul     ebx                             ;width*3 (result is in eax)
         mov     dword [ebp-24], eax             ;store normWidth in [ebp-36]
 
         ;padding calculate
-        and     eax, 3                          ;in eax there was already normWidth
-        mov     edx, 4                                  
+        and     eax, 0x3                        ;in eax there was already normWidth
+        mov     edx, 0x4                                  
         sub     edx, eax
         mov     dword [ebp-16], edx             ;store padding in [ebp-24]
 
+        ;set counters
         mov     eax, dword [edi+22]             ;load height to eax
         mov     dword [ebp-12], eax             ;set rowCounter as height
         mov     dword [ebp-20], 0               ;set columnCounter to 0
@@ -44,10 +45,10 @@ _reduce_contrast:
 row:
         mov     al, [edi]                       ;load current pixel to al
         mov     ebx, [ebp+12]                   ;load rfactor to ebx
-        add     eax, -128                       ;pixel -= 128
+        add     eax, -0x80                      ;pixel -= 128
         imul    bl                              ;pixel *= rfactor
-        sar     eax, 7                          ;pixel /= 128
-        add     eax, 128                        ;pixel += 128
+        sar     eax, 0x7                        ;pixel /= 128
+        add     eax, 0x80                       ;pixel += 128
         mov     byte[edi], al                   ;update pixel in edi
         inc     edi                             ;go to the next pixel
 
