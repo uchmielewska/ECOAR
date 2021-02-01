@@ -27,16 +27,17 @@ _reduce_contrast:
 
         ;normWidth calculate
         mov     ebx, [edi+18]                   ;load width to eax
-        lea     ebx, [ebx + ebx*2]              ;width*3 and store normWidth in esi
+        lea     ebx, [ebx + ebx*2]              ;width*3 and store normWidth in ebx
 
         ;padding calculate
-        and     bl, 3                           ;in eax there was already normWidth
+        mov     al, bl                          ;in ebx there is normWidth
+        and     al, 3                           
         mov     cl, 4                                  
-        sub     cl, bl                          ;store padding in cl
+        sub     cl, al                          ;store padding in cl
 
         ;set counters
         mov     edx, [edi+22]                   ;set rowCounter (edx) to height
-        xor     esi, esi                        ;set columnCounter (ebx) to 0
+        xor     esi, esi                        ;set columnCounter (esi) to 0
 
         ;move image pointer to the beginning of the bitmap (by the offset size)
         mov     eax, [edi+10]                   ;load offset to eax
@@ -44,7 +45,7 @@ _reduce_contrast:
 
 algorithm:
         mov     al, [edi]                       ;load current pixel to al
-        add     eax, -128                       ;pixel -= 128
+        sub     eax, 128                        ;pixel -= 128
         imul    ch                              ;pixel *= rfactor
         sar     eax, 7                          ;pixel /= 128
         add     eax, 128                        ;pixel += 128
@@ -60,7 +61,7 @@ padding:
         mov     al, [edi]                       ;load current pixel to al
         add     al, cl                          ;move image pointer by the number of padding bytes
         xor     esi, esi                        ;set columnCounter as 0
-        cmp     edx, 0                          ;compare rowCounter with 0
+        test    edx, edx                        ;test if edx is equal to 0
         jg      algorithm                       ;if (rowCounter > 0) go to algorithm
 
 exit:  
