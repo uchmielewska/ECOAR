@@ -11,13 +11,12 @@
 ;pixel *= rfactor;
 ;pixel /= 128;
 ;pixel += 128;
-
 section .text
 global _reduce_contrast
 
 _reduce_contrast:
         push    ebp 
-        mov     ebp, esp         
+        mov     ebp, esp     
         push    ebx
         push    edi
         push    esi
@@ -43,7 +42,7 @@ _reduce_contrast:
         mov     eax, [edi+10]                   ;load offset to eax
         add     edi, eax                        ;move pointer by the offset value
 
-algorithm:
+pixel_processing:
         mov     al, [edi]                       ;load current pixel to al
         sub     eax, 128                        ;pixel -= 128
         imul    ch                              ;pixel *= rfactor
@@ -51,18 +50,19 @@ algorithm:
         add     eax, 128                        ;pixel += 128
         mov     byte[edi], al                   ;update pixel in edi
         inc     edi                             ;go to the next pixel
-
+        
+row_processing:
         inc     esi                             ;columnCounter++
         cmp     ebx, esi                        ;compare normWidth with columnCounter
-        jg      algorithm                       ;if (normWidth > columnCounter) continue with algorithm
+        jge     pixel_processing                ;if (normWidth > columnCounter) continue with pixel_processing
 
-padding:
+column_processing:
+        xor     esi, esi                        ;set columnCounter as 0
         dec     edx                             ;rowCounter--
         mov     al, [edi]                       ;load current pixel to al
         add     al, cl                          ;move image pointer by the number of padding bytes
-        xor     esi, esi                        ;set columnCounter as 0
-        test    edx, edx                        ;test if edx is equal to 0
-        jg      algorithm                       ;if (rowCounter > 0) go to algorithm
+        test    edx, edx                        ;compare rowCounter with 0
+        jg      pixel_processing                ;if (rowCounter > 0) go to pixel_processing
 
 exit:  
         pop     esi
@@ -72,3 +72,4 @@ exit:
         pop     ebp
 
         ret  
+         
