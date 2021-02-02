@@ -36,11 +36,19 @@ _reduce_contrast:
 
         ;set counters
         mov     edx, [edi+22]                   ;set rowCounter (edx) to height
-        xor     esi, esi                        ;set columnCounter (esi) to 0
 
         ;move image pointer to the beginning of the bitmap (by the offset size)
         mov     eax, [edi+10]                   ;load offset to eax
         add     edi, eax                        ;move pointer by the offset value
+
+column_processing:
+        xor     esi, esi                        ;set columnCounter as 0
+        test    edx, edx                        ;compare rowCounter with 0
+        jle     exit
+
+row_processing:
+        cmp     ebx, esi                        ;compare normWidth with columnCounter
+        jl      end_of_line
 
 pixel_processing:
         mov     al, [edi]                       ;load current pixel to al
@@ -50,19 +58,14 @@ pixel_processing:
         add     eax, 128                        ;pixel += 128
         mov     byte[edi], al                   ;update pixel in edi
         inc     edi                             ;go to the next pixel
-        
-row_processing:
-        inc     esi                             ;columnCounter++
-        cmp     ebx, esi                        ;compare normWidth with columnCounter
-        jge     pixel_processing                ;if (normWidth > columnCounter) continue with pixel_processing
+        inc     esi                             ;columnCounter++     
+        jmp     row_processing
 
-column_processing:
-        xor     esi, esi                        ;set columnCounter as 0
+end_of_line:
         dec     edx                             ;rowCounter--
         mov     al, [edi]                       ;load current pixel to al
         add     al, cl                          ;move image pointer by the number of padding bytes
-        test    edx, edx                        ;compare rowCounter with 0
-        jg      pixel_processing                ;if (rowCounter > 0) go to pixel_processing
+        jmp     column_processing
 
 exit:  
         pop     esi
@@ -70,6 +73,5 @@ exit:
         pop     ebx
         mov     esp, ebp
         pop     ebp
-
         ret  
          
