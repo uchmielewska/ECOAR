@@ -24,15 +24,13 @@ _reduce_contrast:
         mov     edi, [ebp+8]                    ;store pointer to the file in edi
         mov     ch, [ebp+12]                    ;store rfactor in ch
 
-        ;normWidth calculate
-        mov     ebx, [edi+18]                   ;load width to eax
-        lea     ebx, [ebx + ebx*2]              ;width*3 and store normWidth in ebx
-
         ;padding calculate
-        mov     al, bl                          ;in ebx there is normWidth
-        and     al, 3                           
-        mov     cl, 4                                  
-        sub     cl, al                          ;store padding in cl
+        mov     ebx, [edi+18]                   ;load width to ebx
+        mov     cl, bl                          ;in ebx there is normWidth
+        and     cl, 3                           ;store padding in cl
+
+        ;normWidth calculate
+        lea     ebx, [ebx + ebx*2]              ;width*3 and store normWidth in ebx
 
         ;set counters
         mov     edx, [edi+22]                   ;set rowCounter (edx) to height
@@ -41,14 +39,8 @@ _reduce_contrast:
         mov     eax, [edi+10]                   ;load offset to eax
         add     edi, eax                        ;move pointer by the offset value
 
-column_processing:
-        xor     esi, esi                        ;set columnCounter as 0
-        test    edx, edx                        ;compare rowCounter with 0
-        jle     exit
-
 row_processing:
-        cmp     ebx, esi                        ;compare normWidth with columnCounter
-        jl      end_of_line
+        mov     esi, ebx                        ;set columnCounter as normWidth
 
 pixel_processing:
         mov     al, [edi]                       ;load current pixel to al
@@ -58,14 +50,13 @@ pixel_processing:
         add     eax, 128                        ;pixel += 128
         mov     byte[edi], al                   ;update pixel in edi
         inc     edi                             ;go to the next pixel
-        inc     esi                             ;columnCounter++     
-        jmp     row_processing
+        dec     esi                             ;columnCounter--    
+        jnz     pixel_processing
 
-end_of_line:
+        movzx   eax, cl
+        add     edi, eax
         dec     edx                             ;rowCounter--
-        mov     al, [edi]                       ;load current pixel to al
-        add     al, cl                          ;move image pointer by the number of padding bytes
-        jmp     column_processing
+        jnz     row_processing
 
 exit:  
         pop     esi
